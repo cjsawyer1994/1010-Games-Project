@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "DrawDebugHelpers.h"
 #include "TenTenGamesProjectCharacter.generated.h"
 
 
@@ -37,8 +38,28 @@ class ATenTenGamesProjectCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* AttackAction;
+
+	
+
 public:
 	ATenTenGamesProjectCharacter();
+	//General Player Variables for editing by a designer
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayerAttributes)
+		float MaxHealth = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayerAttributes)
+		float CurrentHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayerAttributes)
+		float CurrentMana;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayerAttributes)
+		float MaxMana = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PlayerAttributes)
+		float ManaRechargeRate = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TargetingData)
+		AActor* LockedTarget;
 	
 
 protected:
@@ -48,7 +69,32 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
+
+	
+	
+	//GeneralPlayerVariables
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
+		float AttackCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Abilities)
+		float MissileCooldown;
+
+	//Actor to Spawn (currently used as the missile)
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<AActor> ActorToSpawn;
+
+	// Targeting Data Variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TargetingData)
+		FTransform SpawnTransform;
+
+	
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TargetingData)
+		bool bIsLockedOn;
+
+
 
 protected:
 	// APawn interface
@@ -62,5 +108,24 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	//UFUNCTION(BlueprintImplementableEvent)
+		//void Lock();
+
+	UFUNCTION(BlueprintCallable)
+		void Attack();
+
+	UFUNCTION(BlueprintCallable)
+		void RechargeMana();
+
+	UFUNCTION(BlueprintCallable)
+		void SpawnProjectile();
+
+	
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = TargetingData)
+		bool bMissileSpawned;
+
 };
 

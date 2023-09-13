@@ -2,6 +2,7 @@
 
 #include "TenTenGamesProjectCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "ProjectileBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -9,7 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-
+//includiing the "Weapon_Parent.h" class allows me access to the weapon parent class.
 
 //////////////////////////////////////////////////////////////////////////
 // ATenTenGamesProjectCharacter
@@ -55,7 +56,6 @@ void ATenTenGamesProjectCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -64,6 +64,8 @@ void ATenTenGamesProjectCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -123,6 +125,86 @@ void ATenTenGamesProjectCharacter::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
+
+//void ATenTenGamesProjectCharacter::Lock()
+//{
+
+	// Tested running the linetrace via C++, realised that whilst technically it may be optimised better, for initial design & rapid prototyping
+	// the system works better in BP. Would return later once figures/features are more fleshed out to convert.
+	/*FHitResult OutHit;
+	AActor* OutActor;
+	FVector Start = GetActorLocation();
+	Start.Z += 50.0f;
+	Start.X += 200.0f;
+
+	FVector ForwardVector = GetActorForwardVector(); //get the forward vector of the player character
+	FVector End = ((ForwardVector * 500.0f) + Start); //whereever the start point is, go 500 units out from that, and that's the end point.
+	FCollisionQueryParams CollisionParams;
+
+	
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1, 0, 5);
+
+	bool isHit = ActorLineTraceSingle(OutHit, Start, End, ECC_Pawn, CollisionParams);
+	if (isHit)
+	{
+		OutActor = OutHit.GetActor();
+		UE_LOG(LogTemp, Warning, TEXT("Actor hit: %s"), *OutActor->GetName());
+	};
+	}*/
+//}
+
+
+//simple attack function. Will only run if the player has enough Mana.
+void ATenTenGamesProjectCharacter::Attack()
+{
+	if (bIsLockedOn == true && bMissileSpawned != true)
+	{
+		{
+			/*if (AttackCost > CurrentMana) //For now I've commented this out and used a UMG widget in BP instead as it was quicker. Long term I'd use this to replace the BP system
+			{
+				//GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Green, TEXT("Not Enough Mana")); 
+			};*/
+			if (AttackCost <= CurrentMana && LockedTarget != nullptr)
+			{
+				SpawnProjectile();
+				CurrentMana = CurrentMana - AttackCost;
+			}
+		};
+		if (bMissileSpawned == true)
+		{
+			GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Yellow, TEXT("Cooldown Active"));
+		};
+	};
+}
+
+//Simple testing function for recharging Mana to full.
+void ATenTenGamesProjectCharacter::RechargeMana()
+{
+	CurrentMana = MaxMana;
+	GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Green, TEXT("Stamina Recharged!"));
+}
+
+void ATenTenGamesProjectCharacter::SpawnProjectile()
+{
+	AActor* SpawnedActorRef = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnTransform);
+
+	{
+		GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnTransform);
+		bMissileSpawned = true;
+
+		if (ActorToSpawn == nullptr)
+		{
+			bMissileSpawned = false;			// if at any point the "ActorToSpawn" becomes invalid, set bMissileSpawned to false (allowing another missile to be spawned)
+												// Design wise would likely change how this works in future, but for testing this is fine.
+		}
+	};
+}
+
+
+
+
+
 
 
 
